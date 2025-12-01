@@ -84,26 +84,17 @@ app.get("/lagos-airbnb", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "lagos-airbnb", "index.html"));
 });
 
-// Landing page (homepage) - MUST come last among specific routes
+// Landing page (homepage)
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "landing-page", "index.html"));
 });
 
 // ==========================================
-// SPA Fallback - MUST BE LAST (Express v5 compatible)
+// SPA Fallback - MUST BE LAST
 // ==========================================
-// This catches all unmatched GET requests and serves the landing page
-// Use ":path(.*)" instead of "*" for Express v5
-app.get("/:path(.*)", (req, res) => {
+// Using middleware instead of route to avoid path-to-regexp issues
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, "public", "landing-page", "index.html"));
-});
-
-// ==========================================
-// Error Handlers (these run after all routes)
-// ==========================================
-app.use((err, req, res, next) => {
-  console.error("❌ Server Error:", err);
-  res.status(500).send("500 - Internal Server Error");
 });
 
 // ==========================================
