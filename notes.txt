@@ -1,0 +1,3 @@
+- find a way  add more properties to the site. (completed)
+- change the fonts 
+- fix the  "review" nav link still being active when in contact page
