@@ -17,8 +17,23 @@ const PORT = process.env.PORT || 3000; // Use Render's dynamic port if available
 // Parse JSON from frontend
 app.use(express.json());
 
-// Serve all static files inside public
-app.use(express.static(path.join(__dirname, "public")));
+// Serve all static files for landing page (absolute /landing-page/... paths)
+app.use(
+  "/landing-page",
+  express.static(path.join(__dirname, "public", "landing-page"))
+);
+
+// Serve all static files for Lagos-Airbnb page (CSS/JS)
+app.use(
+  "/lagos-airbnb",
+  express.static(path.join(__dirname, "public", "lagos-airbnb"))
+);
+
+// Serve assets folder inside Lagos-Airbnb at absolute /assets/... paths
+app.use(
+  "/assets",
+  express.static(path.join(__dirname, "public", "lagos-airbnb", "assets"))
+);
 
 // ==========================================
 // Routes - Pages
@@ -36,7 +51,7 @@ app.get("/lagos-airbnb", (req, res) => {
 
 // SPA Fallback for all other routes (Express v5 compatible)
 app.get(/.*/, (req, res) => {
-  // Default to homepage if route not matched
+  // Default to landing page if route not matched
   res.sendFile(path.join(__dirname, "public", "landing-page", "index.html"));
 });
 
