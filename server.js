@@ -9,52 +9,34 @@ const fs = require("fs");
 // Initialize App
 // ==========================================
 const app = express();
-const PORT = process.env.PORT || 3000; // Use Render's dynamic port if available
+const PORT = process.env.PORT || 3000;
 
 // ==========================================
 // Middleware
 // ==========================================
-// Parse JSON from frontend
 app.use(express.json());
 
 // ==========================================
-// Serve Static Files
+// Serve Static Files (MUST come BEFORE routes)
 // ==========================================
 
-// Landing page static files (CSS/JS)
+// Landing page static files
 app.use(
   "/landing-page",
   express.static(path.join(__dirname, "public", "landing-page"))
 );
 
-// Lagos-Airbnb CSS/JS
+// Lagos-Airbnb static files
 app.use(
   "/lagos-airbnb",
   express.static(path.join(__dirname, "public", "lagos-airbnb"))
 );
 
-// Lagos-Airbnb assets (images/videos) at /assets/... paths
-app.use(
-  "/assets",
-  express.static(path.join(__dirname, "public", "lagos-airbnb", "assets"))
-);
+// Assets
+app.use("/assets", express.static(path.join(__dirname, "public", "assets")));
 
 // ==========================================
-// Routes - Pages
-// ==========================================
-
-// Landing page (homepage)
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "landing-page", "index.html"));
-});
-
-// Lagos-Airbnb page
-app.get("/lagos-airbnb", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "lagos-airbnb", "index.html"));
-});
-
-// ==========================================
-// Contact Form Submission (Backend)
+// API Routes (MUST come BEFORE page routes)
 // ==========================================
 
 const dataFilePath = path.join(
@@ -67,6 +49,10 @@ const dataFilePath = path.join(
 
 // Ensure JSON file exists
 if (!fs.existsSync(dataFilePath)) {
+  const dir = path.dirname(dataFilePath);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
   fs.writeFileSync(dataFilePath, JSON.stringify([], null, 2));
 }
 
@@ -82,28 +68,35 @@ app.post("/api/contact", (req, res) => {
     return res.json({ success: true, message: "Saved successfully" });
   } catch (err) {
     console.error("❌ Error saving form data:", err);
-    return res.status(500).json({ success: false });
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
 // ==========================================
-// SPA Fallback (Express v5 compatible)
+// Page Routes (MUST come BEFORE SPA fallback)
 // ==========================================
 
-// Must come AFTER all static routes
-app.get(/.*/, (req, res) => {
+// Lagos-Airbnb page
+app.get("/lagos-airbnb", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "lagos-airbnb", "index.html"));
+});
+
+// Landing page (homepage) - MUST come last among specific routes
+app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "landing-page", "index.html"));
 });
 
 // ==========================================
-// 404 Handler
+// SPA Fallback - MUST BE LAST
 // ==========================================
-app.use((req, res) => {
-  res.status(404).send("404 - Page Not Found");
+// This catches all unmatched routes and serves the landing page
+// Useful for client-side routing in SPAs
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "landing-page", "index.html"));
 });
 
 // ==========================================
-// 500 Handler
+// Error Handlers (these run after all routes)
 // ==========================================
 app.use((err, req, res, next) => {
   console.error("❌ Server Error:", err);
@@ -114,5 +107,5 @@ app.use((err, req, res, next) => {
 // Start Server
 // ==========================================
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`✅ Server running on port ${PORT}`);
 });
