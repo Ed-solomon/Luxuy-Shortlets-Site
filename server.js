@@ -33,7 +33,10 @@ app.use(
 );
 
 // Assets
-app.use("/assets", express.static(path.join(__dirname, "public", "assets")));
+app.use(
+  "/assets",
+  express.static(path.join(__dirname, "public", "assets"))
+);
 
 // ==========================================
 // API Routes (MUST come BEFORE page routes)
