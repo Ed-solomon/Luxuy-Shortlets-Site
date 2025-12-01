@@ -17,19 +17,23 @@ const PORT = process.env.PORT || 3000; // Use Render's dynamic port if available
 // Parse JSON from frontend
 app.use(express.json());
 
-// Serve all static files for landing page (absolute /landing-page/... paths)
+// ==========================================
+// Serve Static Files
+// ==========================================
+
+// Landing page static files (CSS/JS)
 app.use(
   "/landing-page",
   express.static(path.join(__dirname, "public", "landing-page"))
 );
 
-// Serve all static files for Lagos-Airbnb page (CSS/JS)
+// Lagos-Airbnb CSS/JS
 app.use(
   "/lagos-airbnb",
   express.static(path.join(__dirname, "public", "lagos-airbnb"))
 );
 
-// Serve assets folder inside Lagos-Airbnb at absolute /assets/... paths
+// Lagos-Airbnb assets (images/videos) at /assets/... paths
 app.use(
   "/assets",
   express.static(path.join(__dirname, "public", "lagos-airbnb", "assets"))
@@ -44,22 +48,15 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "landing-page", "index.html"));
 });
 
-// Lagos Airbnb page
+// Lagos-Airbnb page
 app.get("/lagos-airbnb", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "lagos-airbnb", "index.html"));
-});
-
-// SPA Fallback for all other routes (Express v5 compatible)
-app.get(/.*/, (req, res) => {
-  // Default to landing page if route not matched
-  res.sendFile(path.join(__dirname, "public", "landing-page", "index.html"));
 });
 
 // ==========================================
 // Contact Form Submission (Backend)
 // ==========================================
 
-// Path to JSON file where form submissions are stored
 const dataFilePath = path.join(
   __dirname,
   "public",
@@ -73,7 +70,7 @@ if (!fs.existsSync(dataFilePath)) {
   fs.writeFileSync(dataFilePath, JSON.stringify([], null, 2));
 }
 
-// API endpoint to handle contact form submissions
+// API endpoint for contact form
 app.post("/api/contact", (req, res) => {
   const newEntry = req.body;
   newEntry.createdAt = new Date().toISOString();
@@ -87,6 +84,15 @@ app.post("/api/contact", (req, res) => {
     console.error("❌ Error saving form data:", err);
     return res.status(500).json({ success: false });
   }
+});
+
+// ==========================================
+// SPA Fallback (Express v5 compatible)
+// ==========================================
+
+// Must come AFTER all static routes
+app.get(/.*/, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "landing-page", "index.html"));
 });
 
 // ==========================================
