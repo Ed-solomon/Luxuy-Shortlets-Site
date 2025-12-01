@@ -90,11 +90,11 @@ app.get("/", (req, res) => {
 });
 
 // ==========================================
-// SPA Fallback - MUST BE LAST
+// SPA Fallback - MUST BE LAST (Express v5 compatible)
 // ==========================================
-// This catches all unmatched routes and serves the landing page
-// Useful for client-side routing in SPAs
-app.get("*", (req, res) => {
+// This catches all unmatched GET requests and serves the landing page
+// Use ":path(.*)" instead of "*" for Express v5
+app.get("/:path(.*)", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "landing-page", "index.html"));
 });
 
